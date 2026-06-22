@@ -1,0 +1,131 @@
+Plane und erstelle ein pygame in dem in der theorie unendlich viele und große level existieren. Erst klein und dan immer größer. Levelgröße +round(Levelgröße*0.1) = neue Größe. Bei level 1 ist es also 10+1=11 also ist level 2 = 11x11 Tiles. dann 11+round(1.1)=12... Erstelle ein skript, dass automatisch aus dem zweidimensionalen TileArray mit den maßen des Levels automatisch. daraus soll dann eine texture gebacken werden, die das labyrinth darstellt mit transparency, sodass man das auch für collisions verwenden kann. das img wird dan über den background gemalt und in der mitte ist der Character. WASD um den hintergrund in die gegengesetzte richtung zu bewegen und mit vektoren, da man sonst diagonal schneller wäre. mach, dass vor dem erstellen auch noch event tiles zufällig über die map verteilt werden, die man triggern kann, wenn man sie wenn man drauf steht und eine Taste (E) drückt, diese ausbuddelt. in dem ausgebuddelten loch steckt dann ein item, dass man automatisch einsammelt. Diese tiles werden wegen später möglichen animationen nicht gebacken und werden dynamich gedruckt. Der Maze Algorithmus sollte den Startpunkt und den endpunkt von der laufstrecke her am weitesten entfernt gestalten, so dass man das volle maze potential ausnutzt. gespeichert sollen erstellte levels immer wieder direkt spielbar sein, solange die files in dem ordner sind. Also gebackene Bilder und .lvl datei mit array darin. Dieses array speichert start, luft, wand, ziel und eventTiles an ihrer richtigen position via 2d array. Ziel soll es sein, vom Start zum Ende zu gelangen und dabei möglichst viele Items einzusammeln. Plane die eventTiles Modular, damit man in zukunft auch so etwas wie animierte bärenfallen oder weiteres hinzufügen kann. Nutze die Texturen aus dem res ordner
+
+dir ist vielleicht aufgefallen, dass man in lvl 4 sehen kann, dass die -| und die |- gabel Texturen vertauscht sind, was etwas kapput auschaut. fix das. außerdem möchte ich, dass das Fenster auto fullscreen ist deaktivieren soll man das natürlich auch können als eine einstellung per tastendruck. wichtig ist, dass immer die skalierung der tiles so geupdated wird, dass in der vertikalen immer genau 16 Tiles rein passen. außerdem besteht noch kein schöner rand. bei der level border ist einfach nur ein blackscreen. Fix das, indem du als border die Wände aus dem Maze verwendest und dahinter so viel background noch machst, um den screen zu füllen. Dieser outer_maze_bg sollte nach möglichkeit aus kleineren chunks bestehen, die plaziert werden, um nicht unnötig das lvl array zu vergrößern, oder die .png files.  Das sollte vor allem bei mächtigen lvl dateien sinn ergeben. Verkleinere dann noch die hitbox des characters auf den unterkörper, damit sich der spieler nicht überall stößt. Das soll außerdem ausgleich darüber schaffen, dass ein wand tile die komplette hitbox bereitstellt, eine Tile textur jedoch noch etwas kleiner ist, je nach textur. das kann bei z.B. dünnen wänden oder dem 3d effekt der textur für irritation sorgen, da der spieler bei dem gesehenen noch gar nicht die wand berührt hätte, dies aber so gezählt wird aktuell. Fix das ebenfalls.
+
+auf dem bild kann man sehen, dass man, wenn man nach unten gegen eine wand läuft, ca 2 character pixel mit der Tile texture überlappt, was zumindest in dem scenario nicht korrekt ausschaut, weil es dann so wirkt, als würde der charakter auf der mauer stehen.kannst du das fixen, so dass der charakter dann abgeschnitten wird, um ein 3d effekt zu stärken, ohne die performance groß zu beeinträchtigen? wenn ja mach das. Dann sieht man bestimmt, wie die border texture falsch ist. sie besteht aus lauter + kreuzungen und anderen artefakten und nicht aus normalen, stimmigen wänden, was komplett kaputt ausschaut.
+
+das war je jetzt mal komplett blöd, weil durch den 3d effekt der texturen der körper überall, außer oberhalb über der textur des Tiles liegen sollte, nur wenn der character oberhalb eines Tiles dagegen stößt, soll der körper abgeschnitten werden, andernfalls überlappen. darum ist ein komplettes überlappen oder ein komplettes abschneiden des Charakters nicht das richtige. wenn es nicht möglich sein sollte nur oberhalb eines Tiles den charakter körper abzuschneiden, vergrößere bitte einfach die hitbox des players nach unten ein wenig, damit die überlappung zumindest vermieden wird und male dann das maze zuerst und dann wieder erst den player.
+
+perfekt. Nun möchte ich alles ein vielfaches modularer machen, bzw die level generierung und texturen. Dazu soll eine lvl.json genutzt werden, die vorschriebt welche level welche faktoren verwenden. so soll durch "lvls": [1, 3] die ersten drei level beschrieben werden. dann werden die verwendeten textures festgelegt, um variationen zulassen zu können und die Tile Textur Datei ist so aufgebaut, dass es pro reihe 11 tiles gibt und insgesammt 77. diese werden der reihe nach durch indexiert und das fängt mit der id 0 an, dh in der ersten reihe sind id 0 bis 10 vertreten usw. diese ids werden dann verwendet, um in der json angeben zu können, wo sich welches tile im img befindet via: "animated_background": false,
+        "bg_tile_array": [[0, 55], [0, 56], [0, 57]],
+        "wall_tiles": {
+            "vertical": 14,
+            "horizontal": 34,
+            "corner_tl": 4,
+            "corner_tr": 7,
+            "corner_bl": 37,
+            "corner_br": 40,
+            "t_up": 8,
+            "t_down": 41,
+            "t_left": 48,
+            "t_right": 51,
+            "cross": 52,
+            "end_up": 3,
+            "end_down": 25,
+            "end_left": 33,
+            "end_right": 35,
+            "single": 36
+        } eine ganze reihe an lvl kann also so definiert werden: [
+    {
+        "lvls": [1, 1],
+        "size": [10, 10],
+        "events": ["key"],
+        "vignette": false,
+        "end": "random",
+        "end_tile": [0, 58],
+        "character": "./assets/textures/character.png",
+        "filenames": ["./assets/textures/grass.png"],
+        "animated_background": false,
+        "bg_tile_array": [[0, 55], [0, 56], [0, 57]],
+        "wall_tiles": {
+            "vertical": 14,
+            "horizontal": 34,
+            "corner_tl": 4,
+            "corner_tr": 7,
+            "corner_bl": 37,
+            "corner_br": 40,
+            "t_up": 8,
+            "t_down": 41,
+            "t_left": 48,
+            "t_right": 51,
+            "cross": 52,
+            "end_up": 3,
+            "end_down": 25,
+            "end_left": 33,
+            "end_right": 35,
+            "single": 36
+        }
+    },
+    {
+        "lvls": [2, 2],
+        "size": [100, 100],
+        "events": [],
+        "vignette": false,
+        "end": "random",
+        "end_tile": [0, 36],
+        "character": "./assets/textures/character.png",
+        "filenames": ["./assets/textures/stone.png", "./assets/textures/Water.png"],
+        "animated_background": true,
+        "bg_tile_array": [[1, 0], [1, 1], [1, 2]],
+        "wall_tiles": {
+            "vertical": 14,
+            "horizontal": 34,
+            "corner_tl": 4,
+            "corner_tr": 7,
+            "corner_bl": 37,
+            "corner_br": 40,
+            "t_up": 8,
+            "t_down": 41,
+            "t_left": 48,
+            "t_right": 51,
+            "cross": 52,
+            "end_up": 3,
+            "end_down": 25,
+            "end_left": 33,
+            "end_right": 35,
+            "single": 36
+        }
+    },
+    {
+        "lvls": [3, 14],
+        "size": [15, 15],
+        "events": [],
+        "vignette": false,
+        "end": "random",
+        "end_tile": [0, 36],
+        "character": "./assets/textures/character.png",
+        "filenames": ["./assets/textures/stone.png", "./assets/textures/Water.png"],
+        "animated_background": true,
+        "bg_tile_array": [[1, 0], [1, 1], [1, 2]],
+        "wall_tiles": {
+            "vertical": 14,
+            "horizontal": 34,
+            "corner_tl": 4,
+            "corner_tr": 7,
+            "corner_bl": 37,
+            "corner_br": 40,
+            "t_up": 8,
+            "t_down": 41,
+            "t_left": 48,
+            "t_right": 51,
+            "cross": 52,
+            "end_up": 3,
+            "end_down": 25,
+            "end_left": 33,
+            "end_right": 35,
+            "single": 36
+        }
+    }
+
+ich erlaube dir nun nach belieben neue ordner und dateien erstellen zu dürfen, damit du mal den code aufräumst und das alles auch für menschen lesbar machst. versuche dateien so kurz wie möglich zu halten, indem du gruppierbare dinge in externen dateien und classen auslagerst. nenne die dateien etc natürlich sinnig. Dieser Aufräumprozess ist wichtig, damit ich damit auch das tokenlimit reduzieren kann für claude. falls ich also einen neuen chat öffne soll claude nicht 4000 zeilen aus einer datei zu lesen um alles zu verstehen. dazu lege eine datei an, die KIs das Projekt erklärt. und den aufbau dazu
+
+mack, dass die ausbuddelbaren items  nicht mehr mit e sondern mit spacebar aufgesammelt werden mach es zudem so, dass die items nicht einfach random überall spawnen, sondern vorwiegend in sackgassen und nicht ganz so häufig. Nach dem aufsammeln sollen sie zudem keinen schatten hinterlassen
+
+erstelle eine inventar ansicht an der oberen linken ecke von oben nach unten. diese soll aus quadraten bestehen, die aus dem bild @res/assets/textures/Sprite-sheets/Sprite sheet for Basic Pack.png   stammen und sollen das item und unten rechts davon die anzahl zeigen. da die Icons doppelt so groß wie die ui quadrate zerstückel die quadrate in die  8 rand stücke und das mittelstück. nimm dann das mittelstück mal 4  und die ränder mal  2 je und setze dann die ecken wieder drann um so aus 3x3 4x4 zu machen. dann nimm für karotten das icon aus @res/assets/textures/emojis-free/Emoji_Spritesheet_Free.png  pos=128 & 416.
+
+Nein nein nein. hole dir die 9 ui quadrate von @res/assets/textures/Sprite-sheets/Sprite sheet for Basic Pack.png  aus pos 0, 145; 16, 145; 32, 145; 0, 171; 16, 171; ...  (each 16x16) und baue sie so zusammen zu einem größeren: 1, 2, 2, 3; 4, 5, 5, 6; 4, 5, 5, 6; 7, 8, 8, 9 insgesammt 64x64 dann pack da die 32x32 karotte da rein
+
+perfekt aber das inventar sollte als ui die ganze zeit da sein. nicht erst dann wenn man items hat. mach außerdem, dass man die items nur für das level hat und wenn man das level neu startet, die items wieder einsammelbar sind. Aktuell werden items nämlich ins nächste level mitgenommen und wenn man items ausgebuddelt hat, bleiben sie das auch, wenn man das level neu spielt oder das spiel neustartet. fix das
+
+Ersetze das Inventory komplett mit einem Element am unteren bildrand mittig. Nutze @res/assets/textures/emojis-free/emoji style ui/inventory_example_with_slots_2.png dafür. Dieses Bild bietet 32x32 inventarslots an folgenden positionen:  15, 35; 63, 35; 111. 35; 159, 35; 207, 35; 255, 35 Zusätzlich dazu bietet das Bild platz für eine Healthbar für kleine Herzen (15x14) bei pos: 23, 8; 40, 8; 57, 8; 74, 8; 91, 8 Das sind jedoch nur leere herzen und für Herzen, die noch da sind muss folgende texture darübergelegt werden (15x14) @res/assets/textures/emojis-free/emoji style ui/Inventory_Herat_Spritesheet.png  pos 0, 2 implementiere beides. Inventar und Lebensanzeige. Wenn man über eine noch aktive Beartrap läuft sollen zwei herzen abgezogen werden. 
+
